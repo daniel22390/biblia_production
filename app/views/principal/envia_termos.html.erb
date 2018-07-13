@@ -1,0 +1,785 @@
+<div class="container">
+   <div class="row" style="margin-bottom: 10px;">
+      <div class="col-md-8 mx-auto" style="margin-top: 30px;">
+         <%= form_tag("/resultados", method: "get", :id => 'envia_termos') do %>
+         <div class="input-group input-group-lg">
+            <span class="input-group-btn">
+               <ul class="dropdown-menu">
+                  <li><a role="button" class="nlk-search-type" data-radio="#target-nlk" data-value="in NML Website" data-action="/" data-param="s" data-target="_self">NML Website - services, resources, activities, news...</a></li>
+                  <li><a role="button" class="nlk-search-type" data-radio="#target-medvik" data-value="in Medvik Portal" data-action="http://www.medvik.cz/bmc/opensearch.do" data-param="q" data-target="_self">Medvik - library catalogs, Czech articles</a></li>
+                  <li><a role="button" class="nlk-search-type" data-radio="#target-summon1" data-value="in Summon" data-action="http://nlk.summon.serialssolutions.com/" data-param="q" data-target="_self">Summon - online resources and full texts</a></li>
+               </ul>
+            </span>
+            <input id="nlk-search-str" name="termos" type="text" maxlength="200" class="form-control" placeholder="Digite aqui os termos" data-def="Enter a query" value="<%= params[:termos] %>" required>
+            <span class="input-group-btn"> 
+            <button class="btn btn-primary" type="submit" id="nlk-search-submit">
+            <i class="fa fa-search"></i>
+            </button> 
+            </span>    
+         </div>
+         <div class="adv-search-target">
+            <label class="radio-inline">
+            <input type="checkbox" name="exata" id="target-nlk" value="exata" class="nlk-search-type nlk-radio" data-value="in NML Website" data-action="/" data-param="s" data-target="_self" <%= if(params[:exata])
+                      "checked"
+                    end
+                    %>> Exata
+            </label>
+            <label class="radio-inline" style="margin-left: 10px;">
+            <input type="checkbox" name="sinonimo" id="target-medvik" value="sinonimo" class="nlk-search-type nlk-radio" data-value="in Medvik Portal" data-action="http://www.medvik.cz/bmc/opensearch.do" data-param="q" data-target="_self" <%= if(params[:sinonimo])
+                      "checked"
+                    end
+                    %>> Sinônimos
+            </label>
+            <label class="radio-inline" style="margin-left: 10px;">
+            <input type="checkbox" name="antonimo" id="target-summon2" value="antonimo" class="nlk-search-type nlk-radio" data-value="in Summon" data-action="http://nlk.summon.serialssolutions.com/" data-param="q" data-target="_self" <%= if(params[:antonimo])
+                      "checked"
+                    end
+                    %>> Antônimos
+            </label>
+            <label class="radio-inline" style="margin-left: 10px;">
+            <input type="checkbox" name="verbo" id="target-summon3" value="verbo" class="nlk-search-type nlk-radio" data-value="in Summon" data-action="http://nlk.summon.serialssolutions.com/" data-param="q" data-target="_self" <%= if(params[:verbo])
+                      "checked"
+                    end
+                    %>> Verbos
+            </label>
+            <label class="radio-inline" style="margin-left: 10px;">
+            <input type="checkbox" name="radical" id="target-summon4" value="radical" class="nlk-search-type nlk-radio" data-value="in Summon" data-action="http://nlk.summon.serialssolutions.com/" data-param="q" data-target="_self" <%= if(params[:radical])
+                      "checked"
+                    end
+                    %>> Radical
+            </label>
+         </div>
+         <% end %>
+      </div>
+   </div>
+   <div class="row" style="margin-bottom: 10px;">
+      <div class="col-md-12">
+         <div class="list-group resultados">
+            <% @resultado.each_with_index do |resposta, index| -%>
+              <button type="button" idVersiculo="<%= resposta["idVersiculo"] %>" position="<%= index + 1 %>" class="list-group-item list-group-item-action">
+                <div class="col-md-9">
+                  <div class="col-md-12 text-primary cabecalho">
+                      <%= "#{resposta["livro"]} #{resposta["capitulo"]}:#{resposta["versiculo"]}" %>
+                  </div>
+                  <div class="col-md-12 texto">
+                      <%= resposta["texto"] %>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div>
+                    <div class="text-primary text-center">PONTUAÇÃO</div>
+                    <div>
+                      <% if @ranking[index][:peso] == 1000 -%>
+                        <p class="contexto text-center">Exato</p>
+                      <% else -%>
+                        <p class="contexto text-center"><%= @ranking[index][:peso].round(2) %></p>
+                      <% end -%>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-1">
+                  <div>
+                    <% if(index != 0) -%>
+                      <div class="text-center btn_swap btn_up"><span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></div>
+                    <% else -%>
+                      <div class="text-center btn_swap btn_up" style="display: none;"><span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></div>
+                    <% end -%>
+                    <% if(index != 9) -%>
+                      <div class="text-center btn_swap btn_down"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></div>
+                    <% else -%>
+                      <div class="text-center btn_swap btn_down" style="display: none;"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></div>
+                    <% end -%>
+                  </div>
+                </div>
+              </button>
+            <% end -%>
+         </div>
+      </div>
+   </div>
+   <div>
+      <nav aria-label="Page navigation example" class="text-center">
+        <ul class="pagination justify-content-center">
+          
+        </ul>
+      </nav>
+   </div>
+</div>
+
+ <%= form_tag("/salva_pesquisa", method: "post", :class => 'envia_pesquisa') do %>
+  <input type="hidden" name="pesquisa[pesquisado]" value="<%= params[:termos] %>">
+  <input type="hidden" name="pesquisa[usuario_id]" value="<%= @usuario.as_json['id'] %>">
+  <% if(params[:exata]) -%>
+    <input type="hidden" name="pesquisa[pesoExata]" value="<%= @usuario.as_json['pesoExata'] %>">
+  <% end -%>
+  <% if(params[:sinonimo]) -%>
+    <input type="hidden" name="pesquisa[pesoSinonimo]" value="<%= @usuario.as_json['pesoSinonimo'] %>">
+  <% end -%>
+  <% if(params[:antonimo]) -%>
+    <input type="hidden" name="pesquisa[pesoAntonimo]" value="<%= @usuario.as_json['pesoAntonimo'] %>">
+  <% end -%>
+  <% if(params[:radical]) -%>
+    <input type="hidden" name="pesquisa[pesoRadical]" value="<%= @usuario.as_json['pesoRadical'] %>">
+  <% end -%>
+  <% if(params[:verbo]) -%>
+    <input type="hidden" name="pesquisa[pesoFlexao]" value="<%= @usuario.as_json['pesoFlexao'] %>">
+  <% end -%>
+<% end -%>
+
+<%= form_tag("/altera_ranking", method: "post", :id => 'envia_alteracao') do %>
+  <input type="hidden" name="pesquisa[pos_original]" class="pos_original_alteracao" value="">
+  <input type="hidden" name="pesquisa[pos_atual]" class="pos_atual_alteracao" value="">
+  <input type="hidden" name="pesquisa[peso]" class="peso_alteracao" value="">
+  <input type="hidden" name="pesquisa[pesquisa_id]" class="pesquisa_id_alteracao" value="">
+  <input type="hidden" name="pesquisa[versiculo_id]" class="versiculo_id_alteracao" value="">
+<% end -%>
+
+<div class="modal fade modal_mensagem" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <div class="text-center"><h4 class="modal-title" id="nome_usuario_msg"></h4></div>
+      </div>
+      <div class="modal-body">
+         <p class="text-center"><strong>Bem-vindo ao nosso sistema de ranking sobre a bíblia.</strong></p>
+         <p class="text-center"><strong>Antes de comerçarmos, veja algumas pequenas instruções:</strong></p>
+         <ul>
+            <li>
+              Você poderá fazer uma busca em vários contextos, marque em quais contextos você quer que sua busca seja inserida (exata, sinônimos, etc.). 
+              <div class="text-center" style="margin-top: 10px; margin-bottom: 25px;"><%= image_tag("instrucao1.png", :width => "465px", :height => "106px", :class  => "img-thumbnail") %></div>
+            </li>
+            <li style="margin-top: 10px;">
+              Nos resultados da busca, serão exibidos em destaque os termos que estão inseridos nos contextos pretendidos por você.
+              <div class="text-center" style="margin-top: 10px; margin-bottom: 25px;"><%= image_tag("instrucao2.png", :width => "607px", :height => "155px", :class  => "img-thumbnail") %></div>
+            </li>
+            <li style="margin-top: 10px;">
+              A direita dos resultados da busca, serão exibidos os pesos de cada versìculo.
+              <div class="text-center" style="margin-top: 10px; margin-bottom: 25px;"><%= image_tag("instrucao3.png", :width => "746px", :height => "54px", :class  => "img-thumbnail") %></div>
+            </li>
+            <li style="margin-top: 10px;">
+              Os dez primeiros resultados poderão ser reordenados pelas setas à direita dos resultados. Portanto, caso os versìculos estejam em uma sequência que não o satisfaça, por favor os reordene. Assim, poderemos usar essa avaliação como um feedback para este trabalho.
+              <div class="text-center" style="margin-top: 10px; margin-bottom: 25px;"><%= image_tag("instrucao4.png", :width => "837px", :height => "52px", :class  => "img-thumbnail") %></div>
+            </li>
+            <li style="margin-top: 10px;">
+              Cada contexto possui um peso em relação a busca efetuada. Caso você queira dar mais ou menos importância a um contexto, vá até a área de login localizada na parte superior direita da página, clique em "PESOS DE BUSCA", e insira os valores dos pesos desejados.
+              <div class="text-center" style="margin-top: 10px; margin-bottom: 25px;"><%= image_tag("instrucao5.png", :width => "576px", :height => "313px", :class  => "img-thumbnail") %></div>
+            </li>
+            <li style="margin-top: 10px;">
+               Devido a grande quantidade de documentos analisados, talvez a busca demore um pouco. Basta somente aguardar e o resultado será exibido.
+              <div class="text-center" style="margin-top: 10px; margin-bottom: 25px;"><%= image_tag("instrucao6.png", :width => "563px", :height => "127px", :class  => "img-thumbnail") %></div>          
+            </li>
+         </ul>
+         <p class="text-center"><strong>Boa avaliação!</strong></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script type="text/javascript">
+  var tamanho = <%= @ranking.length %>;
+  var ranking = [];
+
+  var versiculos = {};
+  <% @ranking.each_with_index do |resposta, index| -%>
+    var _termos = {};
+    <% resposta[:termos].each do |key, termo| -%>
+      _termos[<%= key %>] = {termo: '<%= "#{ termo["termo"]}" %>', aparicoes: <%= "#{termo[:aparicoes]}" %>, aparicoes_termo: <%= "#{termo[:aparicoes_termo]}" %>, contexto: '<%= "#{termo[:contexto]}" %>', pesquisa: '<%= "#{termo[:pesquisa]}" %>'};
+    <% end -%>
+    versiculos[<%= "#{ resposta[:versiculo]}" %>] = {termos: _termos, peso: <%= "#{ resposta[:peso]}" %>};
+    ranking.push(<%= "#{ resposta[:versiculo]}" %>);
+  <% end -%>
+
+  geraMarcacao();
+
+  var _data = $('.envia_pesquisa').serialize();
+  var _method =  $('.envia_pesquisa').attr('method');
+  var _action =  $('.envia_pesquisa').attr('action');
+  var pesquisa_efetuada;
+
+  swal({
+  title: 'Aguarde...',
+  text: 'Buscando dados do servidor!',
+  width: "50%",
+  onOpen: () => {
+    swal.showLoading();
+  }
+	}).then((result) => {
+  });
+  $('.btn_swap').attr('disabled', true);
+  
+  $.ajax({
+    method: _method,
+    url: _action,
+    data: _data,
+    dataType: "json"
+  })
+  .done(function( msg ) {
+    swal.close();
+    pesquisa_efetuada = msg;
+    $('.btn_swap').attr('disabled', false);
+  });
+
+  var paginas = '<li class="page-item"><a class="page-link-previous" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span><span class="sr-only">Previous</span></a></li>';
+  var limite;
+  for(i = 0; i < (tamanho / 10); i++){
+    if(i === 0)
+      paginas += '<li class="page-item active"><a class="page-link" href="#">'+ (i + 1) +'</a></li>';
+    else if (i >= 10){
+      paginas += '<li class="page-item"><a class="page-link-more" href="#">...</a></li>';
+      break;
+    }
+    else
+      paginas += '<li class="page-item"><a class="page-link" href="#">'+ (i + 1) +'</a></li>';
+  }
+  paginas += '<li class="page-item"><a class="page-link-next" href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span><span class="sr-only">Next</span></a></li>';
+  $(".pagination").html(paginas);
+
+
+  //continuar fazendo a marcacao  no html dos contextos de cada versiculo
+  //---------------------------------------------------------------------
+
+  function geraMarcacao(){
+    $.each($('.resultados .list-group-item'), function(k, v){
+      var _versiculo = $(v).attr("idversiculo");
+      
+      if($(v).find('.contexto').text() === "Exato"){
+        var _texto = $(v).find('.texto').html();
+        var searchMask = $('#nlk-search-str').val();
+        var regEx = new RegExp(searchMask, "i");
+        var replaceMask = "<span style='text-decoration: underline; color: #1a237e; font-weight: bold;'>" + (_texto.match(regEx)[0]) + "</span>";
+        _texto = _texto.replace(regEx, replaceMask);
+        $(v).find('.texto').html(_texto);
+      }
+      else{
+        $.each(versiculos[_versiculo].termos, function(k, termo){
+          var _cor, _aparicoes, _pesquisa, _contexto;
+          if(termo.contexto === "pesoExata"){
+            _cor = "#1a237e";
+            _aparicoes = termo.aparicoes;
+            _pesquisa = termo.pesquisa;
+            _contexto = "Exato";
+          }
+          else if(termo.contexto === "pesoSinonimo"){
+            _cor = "#1b5e20";
+            _aparicoes = termo.aparicoes;
+            _pesquisa = termo.pesquisa;
+            _contexto = "Sinônimo";
+          }
+          else if(termo.contexto === "pesoAntonimo"){
+            _cor = "#e65100";
+            _aparicoes = termo.aparicoes;
+            _pesquisa = termo.pesquisa;
+            _contexto = "Antônimo";
+          }
+          else if(termo.contexto === "pesoFlexao"){
+            _cor = "#3e2723";
+            _aparicoes = termo.aparicoes;
+            _pesquisa = termo.pesquisa;
+            _contexto = "Flexão verbal";
+          }
+          else if(termo.contexto === "pesoRadical"){
+            _cor = "#e91e63";
+            _aparicoes = termo.aparicoes;
+            _pesquisa = termo.pesquisa;
+            _contexto = "Radical";
+          }
+
+          var _texto = $(v).find('.texto').html();
+
+          var searchMask = termo.termo;
+          var regEx = new RegExp("(" + searchMask + ")(?!([^<]+)?>)" ,"ig");
+          var replaceMask = '<span data-html="true" style="text-decoration: underline; color: '+ _cor +'; font-weight: bold;" data-toggle="popover" data-trigger="hover" data-placement="top" title="<div '+ "class='text-center'" +'>'+ _contexto +'</div>" data-content="Termo derivado: '+ _pesquisa +'">' + _texto.match(regEx)[0] + '</span>';
+        
+          _texto = _texto.replace(regEx, replaceMask);
+          $(v).find('.texto').html(_texto);
+          // console.log(termo);
+        });
+
+        $('[data-toggle="popover"]').popover();
+      }
+    });  
+  }
+
+  $("body").on("click", ".page-link", function(ev){
+    var pagina = parseInt($(this).text());
+    var _versos = [];
+    for(var i = (pagina * 10) -10; i < (pagina * 10);  i++) {
+      _versos.push(ranking[i]);
+    }
+    var _data = _versos;
+    $.ajax({
+      method: "get",
+      url: "/pagina",
+      data: {versiculos: _data},
+      dataType: "json"
+    })
+    .done(function( msg ) {
+     var buttons = "";
+      $.each(msg.data, function(k, v){
+          var _btnRanking = "";
+          if(pagina === 1){
+            buttons += '<button type="button" idVersiculo="' + v.idVersiculo +'" position="' + ((pagina * 10) -10 + k + 1) + '" class="list-group-item list-group-item-action">'+
+              '<div class="col-md-9">'+
+                '<div class="col-md-12 text-primary cabecalho">'+
+                    v.livro +' '+ v.capitulo +':'+ v.versiculo +
+                '</div>'+
+              '<div class="col-md-12 texto">'+
+                v.texto +
+              '</div>'+
+              '</div>' +
+              '<div class="col-md-2">'+
+                '<div style="text-align: center;" class="text-primary">PONTUAÇÃO</div>'+
+                '<div style="text-align: center;">';
+            
+            if(versiculos[v.idVersiculo].peso == 1000){
+              buttons += '<p class="contexto">Exato</p>';
+            }
+            else{
+              buttons += '<p class="contexto">'+ versiculos[v.idVersiculo].peso.toFixed(2) +'</p>';
+            }
+            
+            buttons += '</div></div>';
+
+            buttons += '<div class="col-md-1">'+
+              '<div>';
+              if(k !== 0)
+                buttons += '<div class="text-center btn_swap btn_up"><span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></div>';
+              else
+                 buttons += '<div class="text-center btn_swap btn_up" style="display: none;"><span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></div>';
+              if(k !== 9)
+                buttons += '<div class="text-center btn_swap btn_down"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></div>';
+              else
+                 buttons += '<div class="text-center btn_swap btn_down" style="display: none;"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></div>';
+              buttons += '</div>'+
+            '</div>';
+            
+            buttons += '</button>';
+          }
+          else{
+          // buttons += '<button type="button" idVersiculo="'+ v.idVersiculo +'" position="'+ ((pagina * 10) -10 + k - 1) +'" class="list-group-item list-group-item-action"><div class="col-md-12 text-primary cabecalho">'+ v.livro +' '+ v.capitulo +':'+ v.versiculo +'</div><div class="col-md-12 texto">'+ v.texto +'</div></button>';
+            buttons += '<button type="button" idVersiculo="' + v.idVersiculo +'" position="' + ((pagina * 10) -10 + k - 1) + '" class="list-group-item list-group-item-action">'+
+                '<div class="col-md-10">'+
+                  '<div class="col-md-12 text-primary cabecalho">'+
+                      v.livro +' '+ v.capitulo +':'+ v.versiculo +
+                  '</div>'+
+                '<div class="col-md-12 texto">'+
+                  v.texto +
+                '</div>'+
+                '</div>' +
+                '<div class="col-md-2">'+
+                  '<div style="text-align: center;" class="text-primary">PONTUAÇÃO</div>'+
+                  '<div style="text-align: center;">';
+              
+              if(versiculos[v.idVersiculo].peso == 1000){
+                buttons += '<p class="contexto">Exato</p>';
+              }
+              else{
+                buttons += '<p class="contexto">'+ versiculos[v.idVersiculo].peso.toFixed(2) +'</p>';
+              }
+              
+              buttons += '</div></div></button>';
+          }
+      });
+      $(".resultados").html(buttons);
+      $(".page-item").removeClass("active");
+      $(".page-link").filter(function() {
+        return $(this).text() == pagina;
+      }).parent().addClass("active");
+
+      geraMarcacao();
+    });
+  });
+
+  $("body").on("click", ".page-link-previous", function(ev){
+    var pagina = parseInt($(".page-item.active .page-link").text()) - 1;
+    var _versos = [];
+    for(var i = (pagina * 10) -10; i < (pagina * 10);  i++) {
+      _versos.push(ranking[i]);
+    }
+    var _data = _versos;
+    $.ajax({
+      method: "get",
+      url: "/pagina",
+      data: {versiculos: _data},
+      dataType: "json"
+    })
+    .done(function( msg ) {
+      if(pagina != parseInt($(".page-link").first().text()) - 1){
+         var buttons = "";
+        $.each(msg.data, function(k, v){
+          if(pagina === 1){
+
+            buttons += '<button type="button" idVersiculo="' + v.idVersiculo +'" position="' + ((pagina * 10) -10 + k - 1) + '" class="list-group-item list-group-item-action">'+
+              '<div class="col-md-9">'+
+                '<div class="col-md-12 text-primary cabecalho">'+
+                    v.livro +' '+ v.capitulo +':'+ v.versiculo +
+                '</div>'+
+              '<div class="col-md-12 texto">'+
+                v.texto +
+              '</div>'+
+              '</div>' +
+              '<div class="col-md-2">'+
+                '<div style="text-align: center;" class="text-primary">PONTUAÇÃO</div>'+
+                '<div style="text-align: center;">';
+            
+            if(versiculos[v.idVersiculo].peso == 1000){
+              buttons += '<p class="contexto">Exato</p>';
+            }
+            else{
+              buttons += '<p class="contexto">'+ versiculos[v.idVersiculo].peso.toFixed(2) +'</p>';
+            }
+            
+            buttons += '</div></div>';
+
+            buttons += '<div class="col-md-1">'+
+              '<div>';
+              if(k !== 0)
+                buttons += '<div class="text-center btn_swap btn_up"><span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></div>';
+              else
+                buttons += '<div class="text-center btn_swap btn_up" style="display: none;"><span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></div>';
+             
+              if(k !== 9)
+                buttons += '<div class="text-center btn_swap btn_down"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></div>';
+              else
+                buttons += '<div class="text-center btn_swap btn_down" style="display: none;"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></div>';
+              
+              buttons += '</div>'+
+            '</div>';
+            
+            buttons += '</button>';
+          }
+          else{
+            buttons += '<button type="button" idVersiculo="' + v.idVersiculo +'" position="' + ((pagina * 10) -10 + k - 1) + '" class="list-group-item list-group-item-action">'+
+                '<div class="col-md-10">'+
+                  '<div class="col-md-12 text-primary cabecalho">'+
+                      v.livro +' '+ v.capitulo +':'+ v.versiculo +
+                  '</div>'+
+                '<div class="col-md-12 texto">'+
+                  v.texto +
+                '</div>'+
+                '</div>' +
+                '<div class="col-md-2">'+
+                  '<div style="text-align: center;" class="text-primary">PONTUAÇÃO</div>'+
+                  '<div style="text-align: center;">';
+              
+              if(versiculos[v.idVersiculo].peso == 1000){
+                buttons += '<p class="contexto">Exato</p>';
+              }
+              else{
+                buttons += '<p class="contexto">'+ versiculos[v.idVersiculo].peso.toFixed(2) +'</p>';
+              }
+              
+              buttons += '</div></div></button>';
+          }
+        });
+        $(".resultados").html(buttons);
+        $(".page-item").removeClass("active");
+        $(".page-link").filter(function() {
+          return $(this).text() == pagina;
+        }).parent().addClass("active");
+
+        geraMarcacao();
+      }
+      else{
+        var paginas = '<li class="page-item"><a class="page-link-previous" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span><span class="sr-only">Previous</span></a></li>';
+        for(i = 0; i < (tamanho / 10); i++){
+          if(i == (parseInt($(".page-link").first().text())) - 2)
+            paginas += '<li class="page-item active"><a class="page-link" href="#">'+ (i + 1) +'</a></li>';
+          else if (i >= (parseInt($(".page-link").first().text()))){
+            paginas += '<li class="page-item"><a class="page-link-more" href="#">...</a></li>';
+            break;
+          }
+          else if(i >= (parseInt($(".page-link").first().text())) - 12 && i <= (parseInt($(".page-link").first().text()) - 2))
+            paginas += '<li class="page-item"><a class="page-link" href="#">'+ (i + 1) +'</a></li>';
+        }
+        paginas += '<li class="page-item"><a class="page-link-next" href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span><span class="sr-only">Next</span></a></li>';
+        $(".pagination").html(paginas);
+        $(".page-link:last").trigger( "click" );
+      }
+    });
+  });
+
+  $("body").on("click", ".page-link-next", function(ev){
+    var pagina = parseInt($(".page-item.active .page-link").text()) + 1;
+    var _versos = [];
+    for(var i = (pagina * 10) -10; i < (pagina * 10);  i++) {
+      _versos.push(ranking[i]);
+    }
+    var _data = _versos;
+    $.ajax({
+      method: "get",
+      url: "/pagina",
+      data: {versiculos: _data},
+      dataType: "json"
+    })
+    .done(function( msg ) {
+      if(pagina != (parseInt($(".page-link").last().text()) + 1)){
+        var buttons = "";
+        $.each(msg.data, function(k, v){
+
+          if(pagina === 1){
+
+            buttons += '<button type="button" idVersiculo="' + v.idVersiculo +'" position="' + ((pagina * 10) -10 + k - 1) + '" class="list-group-item list-group-item-action">'+
+              '<div class="col-md-9">'+
+                '<div class="col-md-12 text-primary cabecalho">'+
+                    v.livro +' '+ v.capitulo +':'+ v.versiculo +
+                '</div>'+
+              '<div class="col-md-12 texto">'+
+                v.texto +
+              '</div>'+
+              '</div>' +
+              '<div class="col-md-2">'+
+                '<div style="text-align: center;" class="text-primary">PONTUAÇÃO</div>'+
+                '<div style="text-align: center;">';
+            
+            if(versiculos[v.idVersiculo].peso == 1000){
+              buttons += '<p class="contexto">Exato</p>';
+            }
+            else{
+              buttons += '<p class="contexto">'+ versiculos[v.idVersiculo].peso.toFixed(2) +'</p>';
+            }
+            
+            buttons += '</div></div>';
+
+           buttons += '<div class="col-md-1">'+
+              '<div>';
+              if(k !== 0)
+                buttons += '<div class="text-center btn_swap btn_up"><span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></div>';
+              else
+                 buttons += '<div class="text-center btn_swap btn_up" style="display: none;"><span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></div>';
+              
+              if(k !== 9)
+                buttons += '<div class="text-center btn_swap btn_down"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></div>';
+              else
+                 buttons += '<div class="text-center btn_swap btn_down" style="display: none;"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></div>';
+              
+              buttons += '</div>'+
+            '</div>';
+            
+            buttons += '</button>';
+          }
+          else{
+           buttons += '<button type="button" idVersiculo="' + v.idVersiculo +'" position="' + ((pagina * 10) -10 + k - 1) + '" class="list-group-item list-group-item-action">'+
+              '<div class="col-md-10">'+
+                '<div class="col-md-12 text-primary cabecalho">'+
+                    v.livro +' '+ v.capitulo +':'+ v.versiculo +
+                '</div>'+
+              '<div class="col-md-12 texto">'+
+                v.texto +
+              '</div>'+
+              '</div>' +
+              '<div class="col-md-2">'+
+                '<div style="text-align: center;" class="text-primary">PONTUAÇÃO</div>'+
+                '<div style="text-align: center;">';
+            
+            if(versiculos[v.idVersiculo].peso == 1000){
+              buttons += '<p class="contexto">Exato</p>';
+            }
+            else{
+              buttons += '<p class="contexto">'+ versiculos[v.idVersiculo].peso.toFixed(2) +'</p>';
+            }
+            
+            buttons += '</div></div></button>';
+          }
+        });
+        $(".resultados").html(buttons);
+        $(".page-item").removeClass("active");
+        $(".page-link").filter(function() {
+          return $(this).text() == pagina;
+        }).parent().addClass("active");
+
+        geraMarcacao();
+      }
+      else{
+        var paginas = '<li class="page-item"><a class="page-link-previous" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span><span class="sr-only">Previous</span></a></li>';
+        for(i = 0; i < (tamanho / 10); i++){
+          if(i == (parseInt($(".page-link").last().text())))
+            paginas += '<li class="page-item active"><a class="page-link" href="#">'+ (i + 1) +'</a></li>';
+          else if (i >= (parseInt($(".page-link").last().text())) + 11){
+            paginas += '<li class="page-item"><a class="page-link-more" href="#">...</a></li>';
+            break;
+          }
+          else if(i >= (parseInt($(".page-link").last().text())) && i <= (parseInt($(".page-link").last().text()) + 9))
+            paginas += '<li class="page-item"><a class="page-link" href="#">'+ (i + 1) +'</a></li>';
+        }
+        paginas += '<li class="page-item"><a class="page-link-next" href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span><span class="sr-only">Next</span></a></li>';
+        $(".pagination").html(paginas);
+        $(".page-link:first").trigger( "click" );
+      }
+    });
+    
+  });
+
+  $("body").on("click", ".page-link-more", function(ev){
+    var paginas = '<li class="page-item"><a class="page-link-previous" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span><span class="sr-only">Previous</span></a></li>';
+    for(i = 0; i < (tamanho / 10); i++){
+      if(i == (parseInt($(".page-link").last().text())))
+        paginas += '<li class="page-item active"><a class="page-link" href="#">'+ (i + 1) +'</a></li>';
+      else if (i >= (parseInt($(".page-link").last().text()) + 10)){
+        paginas += '<li class="page-item"><a class="page-link-more" href="#">...</a></li>';
+        break;
+      }
+      else if(i >= (parseInt($(".page-link").last().text())) && i <= (parseInt($(".page-link").last().text()) + 9))
+        paginas += '<li class="page-item"><a class="page-link" href="#">'+ (i + 1) +'</a></li>';
+    }
+    paginas += '<li class="page-item"><a class="page-link-next" href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span><span class="sr-only">Next</span></a></li>';
+    $(".pagination").html(paginas);
+    $(".page-link:first").trigger( "click" );
+  });
+
+  $('body').on('click', '.btn_up', function(ev){
+    var _pesquisa1 = false;
+    var _pesquisa2 = false;
+    $(this).prop("disabled", true);
+
+    swapArrayElements(ranking, parseInt($(this).parent().parent().parent().attr("position")) - 1,  parseInt($(this).parent().parent().parent().prev().attr("position")) - 1);
+    
+
+    var _posOriginal = $(this).parent().parent().parent().attr("position");
+    $('.pos_original_alteracao').val(_posOriginal);
+    var _posAtual = $(this).parent().parent().parent().prev().attr("position");
+    $('.pos_atual_alteracao').val(_posAtual);
+    var _peso =  $(this).parent().parent().parent().find(".contexto").text();
+    $('.peso_alteracao').val(_peso);
+    var _versiculoId =  $(this).parent().parent().parent().attr("idversiculo");
+    $('.versiculo_id_alteracao').val(_versiculoId);
+    var _pesquisaId = pesquisa_efetuada.idPesquisa;
+    $('.pesquisa_id_alteracao').val(_pesquisaId);
+    var _method = $('#envia_alteracao').attr("method");
+    var _action = $('#envia_alteracao').attr("action");
+    var _data = $('#envia_alteracao').serialize();
+    $.ajax({
+      method: _method,
+      url: _action,
+      data: _data,
+      dataType: "json"
+    })
+    .done(function( msg ) {
+       _pesquisa1 = true;
+
+      if(_pesquisa1 && _pesquisa2){
+        reloadPage();
+      }
+    });
+
+    _posOriginal = $(this).parent().parent().parent().prev().attr("position");
+    $('.pos_original_alteracao').val(_posOriginal);
+    _posAtual = $(this).parent().parent().parent().attr("position");
+    $('.pos_atual_alteracao').val(_posAtual);
+    _peso =  $(this).parent().parent().parent().prev().find(".contexto").text();
+    $('.peso_alteracao').val(_peso);
+    _versiculoId =  $(this).parent().parent().parent().prev().attr("idversiculo");
+    $('.versiculo_id_alteracao').val(_versiculoId);
+    var _pesquisaId = pesquisa_efetuada.idPesquisa;
+    $('.pesquisa_id_alteracao').val(_pesquisaId);
+    var _method = $('#envia_alteracao').attr("method");
+    var _action = $('#envia_alteracao').attr("action");
+    var _data = $('#envia_alteracao').serialize();
+    $.ajax({
+      method: _method,
+      url: _action,
+      data: _data,
+      dataType: "json"
+    })
+    .done(function( msg ) {
+       _pesquisa2 = true;
+
+      if(_pesquisa1 && _pesquisa2){
+        reloadPage();
+      }
+    });
+  });
+
+  $('body').on('click', '.btn_down', function(ev){
+    var _pesquisa1 = false;
+    var _pesquisa2 = false;
+    $(this).prop("disabled", true);
+
+    swapArrayElements(ranking, parseInt($(this).parent().parent().parent().attr("position")) - 1,  parseInt($(this).parent().parent().parent().next().attr("position")) - 1);
+    
+    var _posOriginal = $(this).parent().parent().parent().attr("position");
+    $('.pos_original_alteracao').val(_posOriginal);
+    var _posAtual = $(this).parent().parent().parent().next().attr("position");
+    $('.pos_atual_alteracao').val(_posAtual);
+    var _peso =  $(this).parent().parent().parent().find(".contexto").text();
+    $('.peso_alteracao').val(_peso);
+    var _versiculoId =  $(this).parent().parent().parent().attr("idversiculo");
+    $('.versiculo_id_alteracao').val(_versiculoId);
+    var _pesquisaId = pesquisa_efetuada.idPesquisa;
+    $('.pesquisa_id_alteracao').val(_pesquisaId);
+
+    var _method = $('#envia_alteracao').attr("method");
+    var _action = $('#envia_alteracao').attr("action");
+    var _data = $('#envia_alteracao').serialize();
+
+    $.ajax({
+      method: _method,
+      url: _action,
+      data: _data,
+      dataType: "json"
+    })
+    .done(function( msg ) {
+      _pesquisa1 = true;
+
+      if(_pesquisa1 && _pesquisa2){
+        reloadPage();
+      }
+    });
+
+    var _posOriginal = $(this).parent().parent().parent().next().attr("position");
+    $('.pos_original_alteracao').val(_posOriginal);
+    var _posAtual = $(this).parent().parent().parent().attr("position");
+    $('.pos_atual_alteracao').val(_posAtual);
+    var _peso =  $(this).parent().parent().parent().next().find(".contexto").text();
+    $('.peso_alteracao').val(_peso);
+    var _versiculoId =  $(this).parent().parent().parent().next().attr("idversiculo");
+    $('.versiculo_id_alteracao').val(_versiculoId);
+    var _pesquisaId = pesquisa_efetuada.idPesquisa;
+    $('.pesquisa_id_alteracao').val(_pesquisaId);
+
+    var _method = $('#envia_alteracao').attr("method");
+    var _action = $('#envia_alteracao').attr("action");
+    var _data = $('#envia_alteracao').serialize();
+
+    $.ajax({
+      method: _method,
+      url: _action,
+      data: _data,
+      dataType: "json"
+    })
+    .done(function( msg ) {
+      _pesquisa2 = true;
+
+      if(_pesquisa1 && _pesquisa2){
+        reloadPage();
+      }
+    });
+  });
+
+  var swapArrayElements = function(arr, indexA, indexB) {
+    var temp = arr[indexA];
+    arr[indexA] = arr[indexB];
+    arr[indexB] = temp;
+  };
+
+  function reloadPage(){
+    $('.page-item.active a').trigger('click');
+  }
+
+  // $.ajax({
+  //   method: "get",
+  //   url: "/marcacao",
+  //   data: "",
+  //   dataType: "json"
+  // })
+  // .done(function( msg ) {
+  //   console.log(msg);
+  // })
+  // .fail(function(erro){
+  //   console.log(erro);
+  // });
+
+</script>
